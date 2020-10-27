@@ -1,0 +1,111 @@
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+}
+
+dialog {
+  padding: 0;
+  border: 5px solid #aaa;
+  border-radius: 5px;
+  background-color: #000;
+  box-shadow: 1px 1px 2px #fff;
+  width: 60%;
+  position: fixed;
+}
+
+dialog[open]{
+  animation: fade-in 1s ease 0s 1 normal;
+}
+
+dialog[closed]{
+  animation: fade-out 1s ease 0s 1 normal;
+}
+
+dialog::backdrop {
+  animation: fade-in 1s ease 0s 1 normal;
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+dialog h3 {
+  padding: 10px;
+  background-color: #ff5a00;
+  margin: 0;
+  color: #fff;
+}
+
+dialog hr {
+    border-color: #ff5a00;
+}
+
+dialog div {
+  color:#424242;
+  padding: 10px;
+}
+
+#close {
+  background-color: #FF5A00;
+  text-align: center;
+  margin: auto;
+  padding: 10px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  width: 50%;
+  font-weight: bold;
+  color: #fff;
+  box-shadow: none;  
+  cursor: pointer;
+  transition: all .5s ease-in;
+  -webkit-transition: all .5s ease-in;
+  -moz-transition: all .5s ease-in;
+}
+
+#close:hover {
+    box-shadow: 0px 1px 3px #ff5a00;
+}
+        
+.thumb{
+  width: 300px;
+  transition: .3s;
+  cursor: pointer;
+}
+
+.thumb:hover{
+ transition: .3s;
+ filter: grayscale(80%);
+}
+
+.thumb img{
+  width: 100%;
+}
+        
+.dialog-content{
+  display: block;
+  color: #fff;
+}
+        
+.image-box{
+  max-width: 600px;
+  margin-right: 20px;
+}
+
+.dialog-content img{
+  width: 100%;
+}
