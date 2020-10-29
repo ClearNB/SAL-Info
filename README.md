@@ -1,2 +1,3 @@
 # SAL-Info
-Select, Answer, Lean! A "IT" Security E-Learning Tool.
+Select, Answer, Learn!
+A "IT" Security E-Learning Tool.
