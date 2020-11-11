@@ -14,7 +14,6 @@
         <link rel="stylesheet" href="style/aquamarine.css" type="text/css">
 
         <!-- Javascript -->
-        <script src="js/navbar-ontop.js"></script>
         <script src="js/animate-in.js"></script>
         <script src="js/loader.js"></script>  
     </head>

@@ -1,0 +1,38 @@
+{
+    "dataname": "SAL Info DataPack",
+    "version": "v.1.0.0",
+    "author": [
+        "Kazuki Matsuda - ClearNB <clear.navy.blue.star@gmail.com>"
+    ],
+    "description": [
+        "このデータパックは、研修およびテストを格納するデフォルトパックです。",
+        "利用にあたり、著作権は「みのくとにか」に帰属されます。",
+        "システムの不具合を防ぐため、本コンテンツの編集・再配布は禁止とします。",
+        "データを反映後、このファイルは削除して構いません。",
+        "(C)2020 Minokutonika Project Team"
+    ],
+    "add_occr": {
+        "name": []
+    },
+    "remove_occr": {
+        "name": []
+    },
+    "add_lesson_theme": {
+        "name": [],
+        "occrname": []
+    },
+    "remove_lesson_theme": {
+        "name": []
+    },
+    "add_lesson_field": {
+        "name": [],
+        "themename": []
+    },
+    "remove_lesson_field": {
+        "name": []
+    },
+    "add_lesson": {
+        "name": [],
+        "themename": []
+    }
+}
