@@ -32,22 +32,7 @@ switch($check) {
 
 <html>
     <head>
-        <meta charset="utf-8">
-        <meta name="application-name" content="SAL Info">
-        <link rel="icon" href="./images/favicon.ico">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>DASHBOARD - SAL Info</title>
-        <meta name="description" content="SAL Info - Select, Answer, Learn!">
-        <!-- CSS -->
-        <link rel="stylesheet" href="./style/Roboto.css" type="text/css">
-        <link rel="stylesheet" href="./style/awesome.min.css" type="text/css">
-        <link rel="stylesheet" href="./style/aquamarine.css" type="text/css">
-        <link rel="stylesheet" href="./jquery-style/jquery-ui.css" type="text/css">
-        <link rel="stylesheet" href="./jquery-style/jquery-ui.structure.css" type="text/css">
-        <link rel="stylesheet" href="./jquery-style/jquery-ui.theme.css" type="text/css">
-        <!-- Javascript -->
-        <script src="./js/animate-in.js"></script>
-        <script src="./js/loader.js"></script>
+        <?php echo $loader->loadHeader('SAL Info', 'DASHBOARD') ?>
     </head>
 
     <body class="text-monospace">
@@ -83,10 +68,7 @@ switch($check) {
 
         <?php echo $loader->Footer() ?>
 
-        <script src="./js/jquery.js"></script>
-        <script src="./jquery/jquery-ui.js"></script>
-        <script src="./js/popper.min.js"></script>
-        <script src="./js/bootstrap.min.js"></script>
+        <?php echo $loader->loadFootS() ?>
         <script type="text/javascript">
             $(function() {
                 $('#lesson').click(function() {

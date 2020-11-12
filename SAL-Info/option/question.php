@@ -8,7 +8,7 @@
  * - Launguage: Japanese
  */
 
-include ('./scripts/session_chk.php');
+include ('../scripts/session_chk.php');
 session_start();
 if(!session_chk()) {
     http_response_code(301);
@@ -32,28 +32,39 @@ if($getdata['PERMISSION'] != 1) {
 }
 
 //Create User
-$former_create = new form_generator('form-account');
-$former_create->Input('userid', 'ユーザID', '最大20文字, 重複なし, 半角英数字', 'id-card-o', true);
-$former_create->Input('username', 'ユーザ名', '半角最大30文字, 全角最大15文字', 'address-book', true);
-$former_create->SubTitle('パスワード', 'このアカウントのパスワードを入力してください。', 'key');
-$former_create->Password('pass', 'パスワード', '大文字・小文字含める半角英数字10-15文字', 'key', true);
-$former_create->Password('r-pass', 'パスワードの確認', 'もう一度入力してください。', 'key', true);
-$former_create->SubTitle('権限の設定', '権限を設定してください。', 'group');
-$former_create->Check(1, 'ow-sel', 'permission', '1', '管理者', false);
-$former_create->Check(1, 'stu-sel', 'permission', '2', '受講者', true);
-$former_create->Button('form_button', 'アカウントを登録');
+$fm_cf = new form_generator('form_confirm');
+$fm_cf->SubTitle('データの初期化を行います',
+        '問題・研修内容について初期化します',
+        'refresh');
+$fm_cf->SubTitle('注意', '以下をご確認ください', 'exclamation-triangle');
+$fm_cf->openList();
+$fm_cf->addList('この操作を行うことにより、問題データならび研修データを入れ替えます');
+$fm_cf->addList('あらかじめ用意されているデータパック（JSON）を所定の位置に配置してください');
+$fm_cf->addList('この操作により、受講者の受講した内容の履歴がすべて初期化されます（受講した履歴・テスト履歴は残ります）');
+$fm_cf->addList('この操作には管理者権限が必要です');
+$fm_cf->closeList();
+$fm_cf->openRow();
+$fm_cf->Buttonx2('bttn_ok_cf', '実行する', 'button', 'play-circle', 'orange');
+$fm_cf->Buttonx2('bttn_back_cf', '設定一覧に戻る', 'button', 'chevron-circle-left', 'gray');
+$fm_cf->closeDiv();
 
-//Change Password
-$former = new form_generator('form-account');
-$former->Password('pass', '現在のパスワード', 'ここには現在のパスワードを入力します。', 'key', true);
-$former->Password('pass', '現在のパスワード', '大文字・小文字含める半角英数字10-15文字', 'key', true);
-$former->Password('r-pass', 'パスワードの確認', 'もう一度入力してください。', 'key', true);
-$former->Button('form_button', 'パスワードを変更');
+//Loading
+$fm_ld = new form_generator('form_loading');
+$fm_ld->SubTitle('処理中です...', 'ブラウザを閉じないでしばらくお待ちください...', 'refresh fa-spin');
+
+//Failed
+$fm_fl = new form_generator('form_failed');
+$fm_fl->SubTitle("手続きに失敗しました。", "データベースの状態を確認してください。", "exclamation-triangle");
+$fm_fl->Caption("<h3 class=\"py-1 md-0\">【警告】</h3><ul class=\"title-view\"><li>データベースの設定を見直してください。</li><li>この件は管理者に必ず相談してください。</li></ul>");
+$fm_fl->openRow();
+$fm_fl->Button('bttn_restart_fl', '再試行', 'button', 'play-circle', 'orange');
+$fm_fl->Button('bttn_back_fl', '設定一覧に戻る', 'button', 'chevron-circle-left', 'gray');
+$fm_fl->closeDiv();
 
 //Completed
-$former2 = new form_generator('completed_window');
-$former2->SubTitle("設定完了しました！", "下記ボタンで設定一覧へ遷移します。", "thumbs-up");
-$former2->Button('back', '設定一覧へ戻る', false);
+$fm_cp = new form_generator('form_completed');
+$fm_cp->SubTitle("設定完了しました！", "下記ボタンで設定一覧へ遷移します。", "thumbs-up");
+$fm_cp->Button('bttn_back_cp', '設定一覧に戻る', 'button', 'chevron-circle-left', 'gray');
 
 $loader = new loader();
 ?>
@@ -61,6 +72,12 @@ $loader = new loader();
 <html>
     <head>
         <?php echo $loader->loadHeader("SAL Info", "OPTION - ACCOUNT", true) ?>
+        <script type="text/javascript">
+            var fm_cf = '<?php echo $fm_cf->Export() ?>';
+            var fm_ld = '<?php echo $fm_ld->Export() ?>';
+            var fm_fl = '<?php echo $fm_fl->Export() ?>';
+            var fm_cp = '<?php echo $fm_cp->Export() ?>';
+        </script>
     </head>
 
     <body class="text-monospace">
@@ -70,15 +87,14 @@ $loader = new loader();
             <div class="container">
                 <div class="row">
                     <?php
-                        echo $loader->Title('CHANGE YOUR PASSWORD', 'key');
-                        echo $loader->Button('back', '設定一覧へ戻る', false);
+                        echo $loader->Title('INITIALIZE', 'refresh');
                     ?>
                 </div>
             </div>
         </div>
 
         <div class="bg-primary py-3">
-            <div class="container text-center" id="data_output">
+            <div class="container" id="data_output">
                 <!-- CONTENT OUTPUTS -->
             </div>
         </div>
@@ -88,7 +104,23 @@ $loader = new loader();
         <?php echo $loader->loadFootS(true) ?>
         
         <script type="text/javascript">
+            $(document).ready(function() {
+                animation('data_output', 400, fm_cf);
+            });
             
+            $(document).on('click', '#bttn_back_cf, #bttn_back_fl, #bttn_back_cp', function() {
+                window.location.href = './index.php';
+            });
+            
+            $(document).on('click', '#bttn_ok_cf, #bttn_restart_fl', function() {
+                animation('data_output', 400, fm_ld);
+                ajax_dynamic_get('../scripts/init_get.php').then(function(data) {
+                    switch(data['res']) {
+                        case 0: animation('data_output', 400, fm_cp); break;
+                        case 1: animation('data_output', 400, fm_fl); break;
+                    }
+                });
+            });
         </script>
     </body>
 </html>

@@ -56,8 +56,8 @@ $former->Button('bttn_back_form2', '戻る', 'button', 'chevron-circle-left', 'g
 //4
 $former2 = new form_generator('form_workYR');
 $former2->SubTitle('勤務年を選択', 'あなたの会社への所属年（もしくは職務の経験年）を教えてください。', 'clock-o');
-$former2->Check(1, 'sel-yr-1', 'sel-yr', 1, '勤務から1年未満', false);
-$former2->Check(1, 'sel-yr-2', 'sel-yr', 2, '勤務から1年以上', false);
+$former2->Check(1, 'selyr_1', 'selyr', 1, '勤務から1年未満', false);
+$former2->Check(1, 'selyr_2', 'selyr', 2, '勤務から1年以上', false);
 $former2->Caption('勤務年の指定により、事前テストにおいて問題の難易度が変動します。勤務年が長い場合、近年追加された要素に関する問題を出題します。<br>講義や確認テストにおいては難易度に変異はありません。');
 $former2->Button('bttn_ok_form3', '完了', 'button', 'check-circle');
 $former2->Button('bttn_back_form3', '戻る', 'button', 'chevron-circle-left', 'gray');
@@ -88,7 +88,7 @@ $form_failed->Caption("<h3 class=\"py-1 md-0\">【警告】</h3><ul class=\"titl
 $form_failed->Button('bttn_back_failed', '最初に戻る', 'button', 'caret-square-o-left');
 
 //9
-$form_completed = new form_generator('failed_form_02');
+$form_completed = new form_generator('form_completed');
 $form_completed->SubTitle("お疲れ様でした", "これにて選択の工程は終了です。", "exclamation-triangle");
 $form_completed->Caption("<h3 class=\"py-1 md-0\">【事前テストを実施】</h3><ul class=\"title-view\">"
         . "<li>事前テストとは、研修の前に行うテストです。</li>"
@@ -114,6 +114,7 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
             var fdata5 = '<?php echo $former_wait->Export() ?>';
             var fdata6 = '<?php echo $former_pro->Export() ?>';
             var fdata7 = '<?php echo $form_failed->Export() ?>';
+            var fdata8 = '<?php echo $form_completed->Export() ?>';
             let arr_wk = <?php echo json_encode($occr_array) ?>;
             let arr_yr = ['', '勤務から1年未満', '勤務から1年以上'];
         </script>
@@ -148,8 +149,30 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                     }
                 }
                 text = text.replace('WORKWKVALUE', checked);
-                text = text.replace('WORKYRVALUE', arr_yr[formdata['workyrvalue_row'][0]['value']]);
+                text = text.replace('WORKYRVALUE', arr_yr[formdata['workyrvalue_row']]);
                 fdata4 = fdata4.replace('<p id="confirm"></p>', '<p id="confirm">' + text + '</p>');
+            }
+
+            function data_convert_cf() {
+                var text = '<ul id="data-view" class="title-view">'
+                        + '<li>職種: WORKWKVALUE</li>'
+                        + '<li>勤務年: WORKYRVALUE</li>'
+                        + '<li>研修テーマ: LSTHEMENAME</li>'
+                        + '<li>研修数（テスト数除く）: LSCOUNT</li>'
+                        + '</ul>';
+                var checked01 = '';
+                for (var i = 0; i < formdata['checkedlist_row'].length; i++) {
+                    checked01 = checked01 + arr_wk[formdata['checkedlist_row'][i]['value'] - 2];
+                    if (i < formdata['checkedlist_row'].length - 1) {
+                        checked01 = checked01 + ', ';
+                    }
+                }
+                var checked02 = formdata['lsthemename'].join(', ');
+                text = text.replace("WORKWKVALUE", checked01);
+                text = text.replace('WORKYRVALUE', arr_yr[formdata['workyrvalue_row']]);
+                text = text.replace('LSTHEMENAME', checked02);
+                text = text.replace('LSCOUNT', formdata['count']);
+                fdata6 = fdata6.replace('<p id="confirm"></p>', '<p id="confirm">' + text + '</p>');
             }
 
             $(document).ready(function () {
@@ -182,7 +205,6 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                             d = d + '_';
                         }
                     }
-                    console.log(d);
                     if (formdata['checkedlist'] !== data) {
                         formdata['checkedlist'] = d;
                         formdata['checkedlist_row'] = data;
@@ -204,13 +226,14 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                 if ($('#error_content').length > 0) {
                     $('#error_content').remove();
                 }
-                var check = $('#form_workYR [name=sel-yr]:checked');
+                var check = $('#form_workYR [name=selyr]:checked');
                 if (check.length === 0) {
                     $('#data_output').append('<div id="error_content" class="failedMessage text-monospace">エラー: どれか1つを選択してください。</div>');
                 } else {
-                    var data = $('#form_workYR').serializeArray();
+                    var data = check.val();
+                    console.log(data);
                     if (formdata['workyrvalue'] !== data) {
-                        formdata['workyrvalue'] = 'wk_ry=' + data;
+                        formdata['workyrvalue'] = "wk_yr=" + data;
                         formdata['workyrvalue_row'] = data;
                     }
                     data_convert();
@@ -234,20 +257,16 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                     fdata4 = document.getElementById('data_output').innerHTML;
                     $('#data_output').html(fdata5).show('slow');
 
-                    $.ajax({
-                        type: 'POST',
-                        url: './scripts/searchls.php',
-                        data: d,
-                        crossDomain: false,
-                        dataType: 'json'
-                    }).done(function (res) {
-
-                        animation('data_output', 400, fdata6);
-                    }).fail(function () {
-                        animation('data_output', 400, fdata7);
+                    ajax_dynamic_post('./scripts/select/searchls.php', d).then(function (data) {
+                        formdata['lsid'] = data['res'].LSID;
+                        formdata['lsthemename'] = data['res'].LSTHEMENAME;
+                        formdata['count'] = data['res'].COUNT;
+                        data_convert_cf(data);
+                        $('#data_output').html(fdata6).show('slow');
                     });
                 });
             });
+
             $(document).on('click', '#bttn_back_confirm', function () {
                 $('#data_output').hide(400, function () {
                     $("#data-view").remove();
@@ -259,12 +278,23 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
 
             //Confirm Page : 6
             $(document).on('click', '#bttn_pro_confirm', function () {
-
+                var d = formdata['workyrvalue'] + '&lsid=' + formdata['lsid'].join('_');
+                $('#data_output').hide(400, function () {
+                    $("#data-view").remove();
+                    fdata4 = document.getElementById('data_output').innerHTML;
+                    $('#data_output').html(fdata5).show('slow');
+                    ajax_dynamic_post('./scripts/select/pushls.php', d).then(function (data) {
+                        
+                    });
+                });
             });
 
             $(document).on('click', '#bttn_pro_back', function () {
                 data_convert();
-                animation('data_output', 400, fdata4);
+                $("#data-view").remove();
+                    fdata4 = document.getElementById('data_output').innerHTML;
+                    $('#data_output').html(fdata2);
+                    $('#data_output').show('slow');
             });
 
             //Confirm Page : 7

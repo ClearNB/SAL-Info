@@ -5,13 +5,13 @@ $requestmg = filter_input(INPUT_SERVER, 'HTTP_X_REQUESTED_WITH');
 $request = isset($requestmg) ? strtolower($requestmg) : '';
 if ($request !== 'xmlhttprequest') {
     http_response_code(403);
-    header('Location: ../403.php');
+    header('Location: ../../403.php');
     exit;
 }
 
-include_once ('../scripts/sqldata.php');
-include_once ('../scripts/common.php');
-include_once ('../scripts/dbconfig.php');
+include_once ('../sqldata.php');
+include_once ('../common.php');
+include_once ('../dbconfig.php');
 
 $method = filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING);
 if ($method === 'POST') {
@@ -31,19 +31,23 @@ if ($method === 'POST') {
         }
         $group_ids_row = implode($group_ids, ', ');
         $select02_sql = select(false, 'MKTK_LS_THEME a, MKTK_LS_FIELD b, MKTK_LS c',
-                'c.LSID',
+                'c.LSID, c.LSNAME, c.LSTYPEID',
                 'WHERE a.LSTHEMEGROUPID IN (' . $group_ids_row . ') AND '
-                . 'a.LSTHEMEGROUPID = b.LSTHEMEGROUPID AND b.LSFIELDID = c.LSFIELDID AND '
-                . 'c.LSTYPEID = 1'
+                . 'a.LSTHEMEGROUPID = b.LSTHEMEGROUPID AND b.LSFIELDID = c.LSFIELDID'
         );
         if($select02_sql) {
-            while ($var = $select02_sql->fetch_assoc()) {
-                    echo json_encode(["res" => $theme_data]);
+            $data = [ 'LSID'=>[], 'LSTHEMENAME'=>$group_names, 'COUNT'=>0 ];
+            while($row = $select02_sql->fetch_assoc()) {
+                array_push($data['LSID'], $row['LSID']);
+                if($row['LSTYPEID'] == 1) {
+                    $data['COUNT'] += 1;
+                }
             }
+            echo json_encode(['res'=>$data]);
         }
 
     } else {
         $theme_data = "該当データなし";
-        echo json_encode(["res" => $theme_data]);
+        echo json_encode(["res"=>$theme_data]);
     }
 }

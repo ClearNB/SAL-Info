@@ -87,9 +87,7 @@ class loader {
         <link rel="stylesheet" href="' . $inc_text . './slick/slick-theme.css" type="text/css">
         <link rel="stylesheet" href="' . $inc_text . './slick/slick.css" type="text/css">
         <script src="' . $inc_text . './js/animate-in.js">
-        </script><script src="' . $inc_text . './js/loader.js"></script>
-        
-        <script type="text/javascript"> function animation(output_id, duration, data) { $(\'#\' + output_id).hide(duration, function () { $(\'#\' + output_id).html(data); $(\'#\' + output_id).show(\'slow\'); }); } </script>';
+        </script><script src="' . $inc_text . './js/loader.js"></script>';
     }
 
     function loadFootS($inc_hide = false) {
@@ -101,7 +99,9 @@ class loader {
         <script src="' . $inc_text . './jquery/jquery-ui.js"></script>
         <script src="' . $inc_text . './slick/slick.js"></script>
         <script src="' . $inc_text . './js/popper.min.js"></script>
-        <script src="' . $inc_text . './js/bootstrap.min.js">
-        </script><script src="' . $inc_text . './js/ajax_dynamic.js"></script>';
+        <script src="' . $inc_text . './js/bootstrap.min.js"></script>
+        <script src="' . $inc_text . './js/animation.js"></script>
+        <script src="' . $inc_text . './js/acc_check.js"></script>
+        <script src="' . $inc_text . './js/ajax_dynamic.js"></script>';
     }
 }

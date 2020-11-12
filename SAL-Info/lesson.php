@@ -19,20 +19,19 @@ $loader = new loader();
 $index = $_SESSION['mktk_userindex'];
 $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE USERINDEX = $index");
 $check = confirm_lessondata($index);
-
 /*
-  if($check === 1) {
+if($check === 1) {
   http_response_code(301);
   header('Location: ./select.php');
-  exit();
-  }
- */
+  \exit();
+}
+*/
 $select = select(false, 'MKTK_LS_DATA', 'CONTENT', 'WHERE LSID = 1');
 $text = "<ul class=\"slider\">";
 $i = 1;
 while ($row = $select->fetch_assoc()) {
     $content = $row["CONTENT"];
-    $text .= "<li><a><img src=\"$content\" alt=\"image-$i\"></a></li>";
+    $text .= "<li><a><img src=\"./data/slide/$content\" alt=\"image-$i\"></a></li>";
     $i += 1;
 }
 $text .= "</ul>";
@@ -54,7 +53,7 @@ $fm_st->SubTitle('研修 - Lesson -', '【研修を行います】', 'book');
 $fm_ls = new form_generator('form_lesson');
 $fm_ls->SubTitle('[研修タイトル]', 'スライドを動かして研修しましょう！', 'book');
 $fm_ls->Caption($text);
-$fm_ls->SubTitle('[Page] / [MaxPage]', 'すべてのページを読むと研修はクリアです', 'book');
+$fm_ls->SubTitle('<span id="page_cross">[Page] / [MaxPage]</span>', 'すべてのページを読むと研修はクリアです', 'book');
 $fm_ls->openRow();
 $fm_ls->Buttonx3('bttn_ls_prv', '', 'button', 'chevron-circle-up');
 $fm_ls->Buttonx3('bttn_ls_nxt', '', 'button', 'chevron-circle-down');
@@ -84,6 +83,7 @@ $fm_cf->Button('bttn_cf_yes', 'いいえ', 'button', 'book', 'gray');
             var fstart = '<?php echo $fm_st->Export() ?>';
             var fless = '<?php echo $fm_ls->Export() ?>';
             var fconf = '<?php echo $fm_ls->Export() ?>';
+            var pages = [];
         </script>
     </head>
 
@@ -116,17 +116,22 @@ $fm_cf->Button('bttn_cf_yes', 'いいえ', 'button', 'book', 'gray');
             });
 
             $(document).ready(function () {
-                $('#data_output').hide(400, function () {
-                    $('#data_output').html(fless);
-                    $('#data_output').show(400, function () {
-                        var d = document.getElementsByClassName('slider');
-                        $(d).slick({
-                            focusOnSelect: true,
-                            infinite: false,
-                            touchMove: true
-                        });
-                    });
-                });
+                animation_update_slides('data_output', 400, fless);
+            });
+            
+            $(document).on('init', '.slider', function(event, slick) {
+                pages['c_page'] = slick.currentSlide + 1;
+                pages['max_page'] = slick.slideCount;
+                pages['cnt_page'] = 1;
+                $('#page_cross').text(pages['c_page'] + ' / ' + pages['max_page'] + '【読込済み: ' + pages['cnt_page'] + 'ページ】');
+            });
+            
+            $(document).on('afterChange', '.slider', function(event, slick) {
+                pages['c_page'] = slick.currentSlide + 1;
+                if(pages['cnt_page'] < slick.slideCount && pages['cnt_page'] < pages['c_page']) {
+                    pages['cnt_page'] += 1;
+                }
+                $('#page_cross').text(pages['c_page'] + ' / ' + pages['max_page'] + '【読込済み: ' + pages['cnt_page'] + 'ページ】');
             });
         </script>
     </body>

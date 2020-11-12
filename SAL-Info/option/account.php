@@ -68,7 +68,7 @@ $fm_ed = new form_generator('edit_account');
 $fm_ed->SubTitle('[USER] さん', 'アカウントを編集します。以下から選択してください。', 'pencil-square-o');
 $fm_ed->Button('bttn_ed_cr', 'ユーザID',            'button', 'address-card');
 $fm_ed->Button('bttn_ed_ed', 'ユーザ名',            'button', 'user-circle');
-$fm_ed->Button('bttn_ed_dl', 'パスワード',          'button', 'trash');
+$fm_ed->Button('bttn_ed_dl', 'パスワード',          'button', 'key');
 $fm_ed->Button('bttn_ed_bk', 'アカウント一覧へ戻る', 'button', 'chevron-circle-left', 'gray');
 
 //Change Password
@@ -134,6 +134,8 @@ $loader = new loader();
         <?php echo $loader->loadFootS(true) ?>
         
         <script type="text/javascript">
+            
+            
             //ドキュメント読込完了時
             $(document).ready(function() {
                 animation('data_output', 400, fm_ac);

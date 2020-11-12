@@ -65,7 +65,7 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                     echo $loader->SubTitle('アカウント管理', '作成・編集・変更ができます。', 'group');
                     echo $loader->button('account', 'アカウント一覧', false, 'user');
                     echo $loader->SubTitle('研修・問題管理', '研修・問題のデータ管理を行います。', 'book');
-                    echo $loader->button('ls_r', '研修・問題パッチの適用', false, 'plus');
+                    echo $loader->button('ls_r', 'データベース内容の初期化', false, 'plus');
                     ?>
                 </div>
             </div>
@@ -90,6 +90,9 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                 });
                 $('#change_username').click(function () {
                     window.location.href = "./edit_username.php";
+                });
+                $('#ls_r').click(function() {
+                    window.location.href = "./question.php";
                 });
             });
         </script>

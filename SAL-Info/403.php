@@ -49,10 +49,8 @@ $logger->Button('bttn_exit', 'ホームに戻る', 'button', 'home', 'orange');
 
         <?php echo $loader->Footer() ?>
 
-        <script src="./js/jquery.js"></script>
-        <script src="./jquery/jquery-ui.js"></script>
-        <script src="./js/popper.min.js"></script>
-        <script src="./js/bootstrap.min.js"></script>
+        <?php echo $loader->loadFootS() ?>
+        
         <script type="text/javascript">
             $(document).ready(function () {
                 animation('data_output', 0, logger);
