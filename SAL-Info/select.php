@@ -14,6 +14,16 @@ if (!session_chk()) {
 }
 $loader = new loader();
 
+$index = $_SESSION['mktk_userindex'];
+$getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE USERINDEX = $index");
+
+include_once './scripts/confirmls.php';
+switch(confirm_lessondata($index)) {
+    case 0: http_response_code(301); header('Location: ./lesson.php'); exit(); break;
+    case 3: case 4: http_response_code(301); header('Location: ./test.php'); exit(); break;
+    case 4: http_response_code(301); header('Location: ./err_d.php'); exit(); break;
+}
+
 /* This is the form Definition top. */
 
 //1
@@ -38,7 +48,7 @@ if ($occr) {
     $i = 1;
     $dummy = $occr->fetch_assoc();
     while ($var = $occr->fetch_assoc()) {
-        $former->Check(0, 'sel-wk-' . $i, 'sel-wk', $var['OCCRID'], $var['OCCRNAME'], false);
+        $former->Check(0, 'selwk-' . $i, 'selwk', $var['OCCRID'], $var['OCCRNAME'], false);
         array_push($occr_array, $var['OCCRNAME']);
         $i += 1;
     }
@@ -67,7 +77,7 @@ $former_confirm = new form_generator('form_confirm', '');
 $former_confirm->SubTitle('入力の確認', '入力事項をご確認ください。', 'pencil-square');
 $former_confirm->Caption('<p id="confirm"></p>');
 $former_confirm->Button('bttn_ok_confirm', '研修内容を確認する', 'button', 'check-circle');
-$former_confirm->Button('bttn_back_confirm', '研修選択へ戻る', 'button', 'chevron-circle-left', 'gray');
+$former_confirm->Button('bttn_back_confirm', '職種選択へ戻る', 'button', 'chevron-circle-left', 'gray');
 
 //6
 $former_pro = new form_generator('form_pro', '');
@@ -82,24 +92,19 @@ $former_wait->SubTitle('しばらくお待ちください...', 'データベー�
 $former_wait->Caption('セッション中です...');
 
 //8
-$form_failed = new form_generator('failed_form_02');
+$form_failed = new form_generator('failed_form_01');
 $form_failed->SubTitle("手続きに失敗しました。", "データベースの状態を確認してください。", "exclamation-triangle");
 $form_failed->Caption("<h3 class=\"py-1 md-0\">【警告】</h3><ul class=\"title-view\"><li>データベースの設定を見直してください。</li><li>この件は管理者に必ず相談してください。</li></ul>");
-$form_failed->Button('bttn_back_failed', '最初に戻る', 'button', 'caret-square-o-left');
+$form_failed->Button('bttn_back_failed01', '選択確認画面に戻る', 'button', 'caret-square-o-left');
 
 //9
 $form_completed = new form_generator('form_completed');
-$form_completed->SubTitle("お疲れ様でした", "これにて選択の工程は終了です。", "exclamation-triangle");
+$form_completed->SubTitle("お疲れ様でした", "これにて選択の工程は終了です。", "check-square");
 $form_completed->Caption("<h3 class=\"py-1 md-0\">【事前テストを実施】</h3><ul class=\"title-view\">"
         . "<li>事前テストとは、研修の前に行うテストです。</li>"
         . "<li>事前テストを受けるには、下記のボタンを押すか、ホームから「研修」を押してください。</li></ul>");
-$form_completed->Button('bttn_begin', '事前テストへ進む', 'button', 'textfile');
-$form_completed->Button('bttn_exit', 'ホームに戻る', 'button', 'home', 'gray');
-
-/* This is the form Definition bottom. */
-
-$index = $_SESSION['mktk_userindex'];
-$getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX = $index");
+$form_completed->Button('bttn_begin_con', '事前テストへ進む', 'button', 'file-text');
+$form_completed->Button('bttn_exit_con', 'ホームに戻る', 'button', 'home', 'gray');
 ?>
 
 <html>
@@ -114,7 +119,8 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
             var fdata5 = '<?php echo $former_wait->Export() ?>';
             var fdata6 = '<?php echo $former_pro->Export() ?>';
             var fdata7 = '<?php echo $form_failed->Export() ?>';
-            var fdata8 = '<?php echo $form_completed->Export() ?>';
+            var fdata8 = '<?php echo $form_failed02->Export() ?>';
+            var fdata9 = '<?php echo $form_completed->Export() ?>';
             let arr_wk = <?php echo json_encode($occr_array) ?>;
             let arr_yr = ['', '勤務から1年未満', '勤務から1年以上'];
         </script>
@@ -141,14 +147,7 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
         <script type="text/javascript">
             function data_convert() {
                 var text = '<ul id="data-view" class="title-view"><li>職種: WORKWKVALUE</li><li>勤務年: WORKYRVALUE</li></ul>';
-                var checked = '';
-                for (var i = 0; i < formdata['checkedlist_row'].length; i++) {
-                    checked = checked + arr_wk[formdata['checkedlist_row'][i]['value'] - 2];
-                    if (i < formdata['checkedlist_row'].length - 1) {
-                        checked = checked + ', ';
-                    }
-                }
-                text = text.replace('WORKWKVALUE', checked);
+                text = text.replace('WORKWKVALUE', formdata['checkedlist_row']);
                 text = text.replace('WORKYRVALUE', arr_yr[formdata['workyrvalue_row']]);
                 fdata4 = fdata4.replace('<p id="confirm"></p>', '<p id="confirm">' + text + '</p>');
             }
@@ -160,17 +159,9 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                         + '<li>研修テーマ: LSTHEMENAME</li>'
                         + '<li>研修数（テスト数除く）: LSCOUNT</li>'
                         + '</ul>';
-                var checked01 = '';
-                for (var i = 0; i < formdata['checkedlist_row'].length; i++) {
-                    checked01 = checked01 + arr_wk[formdata['checkedlist_row'][i]['value'] - 2];
-                    if (i < formdata['checkedlist_row'].length - 1) {
-                        checked01 = checked01 + ', ';
-                    }
-                }
-                var checked02 = formdata['lsthemename'].join(', ');
-                text = text.replace("WORKWKVALUE", checked01);
+                text = text.replace("WORKWKVALUE", formdata['checkedlist_row']);
                 text = text.replace('WORKYRVALUE', arr_yr[formdata['workyrvalue_row']]);
-                text = text.replace('LSTHEMENAME', checked02);
+                text = text.replace('LSTHEMENAME', formdata['lsthemename'].join(', '));
                 text = text.replace('LSCOUNT', formdata['count']);
                 fdata6 = fdata6.replace('<p id="confirm"></p>', '<p id="confirm">' + text + '</p>');
             }
@@ -183,7 +174,7 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
             $(document).on('click', '#bttn_begin', function () {
                 animation('data_output', 400, fdata2);
             });
-            $(document).on('click', '#bttn_exit', function () {
+            $(document).on('click', '#bttn_exit, #bttn_exit_con', function () {
                 window.location.href = 'index.php';
             });
 
@@ -192,22 +183,19 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                 if ($('#error_content').length > 0) {
                     $('#error_content').remove();
                 }
-                var check = $('#form_workType [name=sel-wk]:checked');
+                var check = $('#form_workType [name=selwk]:checked');
                 if (check.length === 0) {
                     $('#data_output').append('<div id="error_content" class="failedMessage text-monospace">エラー: どれか1つを選択してください。</div>');
                 } else {
-                    var data = $('#form_workType').serializeArray();
-                    var d = 'wk_tp=1_';
-                    for (var i = 0; i < data.length; i++) {
-                        var st = data[i]['value'];
-                        d = d + st;
-                        if (i < data.length - 1) {
-                            d = d + '_';
-                        }
-                    }
-                    if (formdata['checkedlist'] !== data) {
+                    var data = {"data": [], "data_row": []};
+                    $('#form_workType [name=selwk]:checked').each(function() {
+                        data.data_row.push(arr_wk[Number($(this).val()) - 2]);
+                        data.data.push(Number($(this).val()));
+                    });
+                    var d = 'wk_tp=1_' + data.data.join('_');
+                    if (formdata['checkedlist'] !== data.data) {
                         formdata['checkedlist'] = d;
-                        formdata['checkedlist_row'] = data;
+                        formdata['checkedlist_row'] = data.data_row.join(', ');
                     }
                     fdata2 = document.getElementById('form_workType');
                     animation('data_output', 400, fdata3);
@@ -262,7 +250,7 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                         formdata['lsthemename'] = data['res'].LSTHEMENAME;
                         formdata['count'] = data['res'].COUNT;
                         data_convert_cf(data);
-                        $('#data_output').html(fdata6).show('slow');
+                        animation('data_output', 400, fdata6);
                     });
                 });
             });
@@ -278,13 +266,17 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
 
             //Confirm Page : 6
             $(document).on('click', '#bttn_pro_confirm', function () {
-                var d = formdata['workyrvalue'] + '&lsid=' + formdata['lsid'].join('_');
+                var d = formdata['checkedlist'] + '&' + formdata['workyrvalue'] + '&lsid=' + formdata['lsid'].join('_');
                 $('#data_output').hide(400, function () {
                     $("#data-view").remove();
                     fdata4 = document.getElementById('data_output').innerHTML;
                     $('#data_output').html(fdata5).show('slow');
                     ajax_dynamic_post('./scripts/select/pushls.php', d).then(function (data) {
-                        
+                        if (data['res'] === 0) {
+                            animation('data_output', 400, fdata9);
+                        } else {
+                            animation('data_output', 400, fdata8);
+                        }
                     });
                 });
             });
@@ -292,9 +284,9 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
             $(document).on('click', '#bttn_pro_back', function () {
                 data_convert();
                 $("#data-view").remove();
-                    fdata4 = document.getElementById('data_output').innerHTML;
-                    $('#data_output').html(fdata2);
-                    $('#data_output').show('slow');
+                fdata4 = document.getElementById('data_output').innerHTML;
+                $('#data_output').html(fdata2);
+                $('#data_output').show('slow');
             });
 
             //Confirm Page : 7
@@ -302,6 +294,8 @@ $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX 
                 data_convert();
                 animation('data_output', 400, fdata4);
             });
+            
+            
         </script>
     </body>
 </html>

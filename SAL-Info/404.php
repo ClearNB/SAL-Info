@@ -8,10 +8,6 @@ include_once './scripts/loader.php';
 
 $loader = new loader();
 
-/* Title Data */
-$title_row = '404 (Not Found)';
-$title = $loader->Title($title_row, 'times-circle');
-
 /* Content Data */
 $logger = new form_generator('logger');
 $logger->SubTitle("表示エラー", "要求されたページは存在しません。", "times-circle");
@@ -32,7 +28,7 @@ $logger->Button('bttn_exit', 'ホームに戻る', 'button', 'home', 'orange');
         <div class="py-1 bg-title">
             <div class="container">
                 <div class="row">
-                    <?php echo $title ?>
+                    <?php echo $loader->Title('404 (Not Found)', 'times-circle') ?>
                 </div>
             </div>
         </div>
@@ -55,7 +51,7 @@ $logger->Button('bttn_exit', 'ホームに戻る', 'button', 'home', 'orange');
             });
             
             $(document).on('click', '#bttn_exit', function () {
-                window.location.href = 'index.php';
+                animation_to_sites('data_output', 400, './');
             });
         </script>
     </body>

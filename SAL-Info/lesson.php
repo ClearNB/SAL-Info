@@ -12,20 +12,19 @@ include_once './scripts/sqldata.php';
 include_once './scripts/dbconfig.php';
 include_once './scripts/former.php';
 include_once './scripts/loader.php';
-include_once './scripts/confirmls.php';
+
 
 $loader = new loader();
 
 $index = $_SESSION['mktk_userindex'];
 $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE USERINDEX = $index");
-$check = confirm_lessondata($index);
-/*
-if($check === 1) {
-  http_response_code(301);
-  header('Location: ./select.php');
-  \exit();
+
+include_once './scripts/confirmls.php';
+switch(confirm_lessondata($index)) {
+    case 1: case 2: http_response_code(301); header('Location: ./select.php'); exit(); break;
+    case 3: case 4: http_response_code(301); header('Location: ./test.php'); exit(); break;
 }
-*/
+
 $select = select(false, 'MKTK_LS_DATA', 'CONTENT', 'WHERE LSID = 1');
 $text = "<ul class=\"slider\">";
 $i = 1;
@@ -100,7 +99,7 @@ $fm_cf->Button('bttn_cf_yes', 'いいえ', 'button', 'book', 'gray');
         <!-- Lesson Contents -->
 
         <div class="bg-primary py-3">
-            <div class="container h-min" id="data_output">
+            <div class="container " id="data_output">
                 <!-- CONTENT OUTPUTS -->
             </div>
         </div>

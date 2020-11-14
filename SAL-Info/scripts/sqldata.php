@@ -57,14 +57,14 @@ function insert_select($table, $column, $select) {
     return $result;
 }
 
-function update($table, $column, $value, $while = '') {
-    $query = "UPDATE $table SET $column = $value $while";
+function update($table, $column, $value, $where = '') {
+    $query = "UPDATE $table SET $column = $value $where";
     $result = query($query);
     return $result;
 }
 
-function delete($table, $while = '') {
-    $query = "DELETE FROM $table $while";
+function delete($table, $where = '') {
+    $query = "DELETE FROM $table $where";
     $result = query($query);
     return $result;
 }

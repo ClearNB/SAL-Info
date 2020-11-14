@@ -14,10 +14,10 @@ include_once './scripts/former.php';
 include_once './scripts/loader.php';
 include_once './scripts/confirmls.php';
 
-//$former = new form_generator();
 $loader = new loader();
 $index = $_SESSION['mktk_userindex'];
 $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE USERINDEX = $index");
+
 $check = confirm_lessondata($index);
 $check_text = '';
 switch($check) {
@@ -28,11 +28,34 @@ switch($check) {
         $check_text = '研修データがありません。';
         break;
 }
+
+$fm = new form_generator('fm');
+$fm->backTitle();
+$fm->SubTitle('研修状況', '現在の状況をお知らせします。<hr>' . $check_text, 'book');
+$fm->closeDiv();
+$fm->openRow();
+switch($getdata['PERMISSION']) {
+    case 1:
+	$fm->ButtonLgx3('wizard', '分析', 'button', 'book', 'orange');
+	$fm->ButtonLgx3('option', '設定', 'button', 'wrench');
+	$fm->ButtonLgx3('logout', 'ログアウト', 'button', 'sign-out');
+	break;
+    case 2:
+	$fm->ButtonLgx2('user', 'ユーザ情報', 'button', 'book', 'orange');
+	$fm->ButtonLgx2('lesson', '研修', 'button', 'book', 'orange');
+	$fm->ButtonLgx2('option', '設定', 'button', 'wrench');
+	$fm->ButtonLgx2('logout', 'ログアウト', 'button', 'sign-out');
+	break;
+}
+$fm->closeDiv();
 ?>
 
 <html>
     <head>
         <?php echo $loader->loadHeader('SAL Info', 'DASHBOARD') ?>
+	<script type="text/javascript">
+	    var fm = '<?php echo $fm->Export() ?>';
+	</script>
     </head>
 
     <body class="text-monospace">
@@ -47,22 +70,8 @@ switch($check) {
         </div>
 
         <div class="bg-primary py-3">
-            <div class="container" id="data_output">
+            <div class="container " id="data_output">
                 <!-- CONTENT OUTPUTS -->
-                <div class="py-1 bg-title">
-                    <?php echo $loader->SubTitle('研修状況', '現在の状況をお知らせします。<hr>' . $check_text, 'book') ?>
-                </div>
-                <div class="row py-2">
-                    <div class="col-md-4">
-                        <?php echo $loader->button('lesson', '研修', false, 'book', 'orange') ?>
-                    </div>
-                    <div class="col-md-4">
-                        <?php echo $loader->button('setting', '設定', false, 'wrench') ?>
-                    </div>
-                    <div class="col-md-4">
-                        <?php echo $loader->button('logout', 'ログアウト', false, 'sign-out') ?>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -71,14 +80,21 @@ switch($check) {
         <?php echo $loader->loadFootS() ?>
         <script type="text/javascript">
             $(function() {
-                $('#lesson').click(function() {
-                    window.location.href = "./lesson.php";
+		$(document).ready(function() {
+		    animation('data_output', 400, fm);
+		});
+		
+                $(document).on('click', '#lesson', function() {
+		    animation_to_sites('data_output', 400, './lesson.php');
                 });
-                $('#setting').click(function() {
-                    window.location.href = "./option";
+		$(document).on('click', '#wizard', function() {
+                    animation_to_sites('data_output', 400, './wizard.php');
                 });
-                $('#logout').click(function() {
-                    window.location.href = "./logout.php";
+                $(document).on('click', '#option', function() {
+                    animation_to_sites('data_output', 400, './option');
+                });
+                $(document).on('click', '#logout', function() {
+                    animation_to_sites('data_output', 400, './logout.php');
                 });
             });
         </script>

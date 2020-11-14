@@ -8,7 +8,9 @@ $(document).on('change', 'input[name="index-s"]', function () {
         var changeFlag = $(this).prop("checked");
         $("#account_table input:checkbox").prop("checked", changeFlag);
     } else {
-        var c_none_checked = $("#account-data input:checkbox").length - $("#account-data input:checkbox:checked").length - s - 1;
+        var c_none_checked = $("#account-data input:checkbox").length
+		- $("#account-data input:checkbox:checked").length - s - 1;
+	console.log(c_none_checked);
         if (c_none_checked === 0) {
             $('#index-0').prop('checked', true);
             s = 1;
@@ -18,15 +20,16 @@ $(document).on('change', 'input[name="index-s"]', function () {
         }
     }
     var c_checked = $("#account_table input:checkbox:checked").length - s;
+    console.log(c_checked);
     if (c_checked > 0) {
         if (c_checked === 1) {
-            $('#edit').prop("disabled", false);
+            $('#bt_ac_ed').prop("disabled", false);
         } else {
-            $('#edit').prop("disabled", true);
+            $('#bt_ac_ed').prop("disabled", true);
         }
-        $('#delete').prop("disabled", false);
+        $('#bt_ac_dl').prop("disabled", false);
     } else {
-        $('#edit').prop("disabled", true);
-        $('#delete').prop("disabled", true);
+        $('#bt_ac_ed').prop("disabled", true);
+        $('#bt_ac_dl').prop("disabled", true);
     }
 });

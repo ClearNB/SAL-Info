@@ -49,20 +49,14 @@ class loader {
     function getUserStatus($user_status) {
         $status_text = '';
         switch ($user_status) {
-            case 0: $status_text = 'ログインしていません';
-                break;
-            case 1: $status_text = '研修を選択中です';
-                break;
-            case 2: $status_text = '研修中です';
-                break;
-            case 3: $status_text = 'テスト中です';
-                break;
-            case 4: $status_text = '設定中です';
-                break;
-            case 5: $status_text = 'おかえりなさい';
-                break;
-            default: $status_text = 'ステータスの取得に失敗しました';
-                break;
+	    case 0: $status_text = 'ログインしていません';	    break;
+	    case 1: $status_text = '研修を選択中です';		    break;
+	    case 2: $status_text = '研修中です';			    break;
+	    case 3: $status_text = 'テスト中です';		    break;
+	    case 4: $status_text = '設定中です';			    break;
+	    case 5: $status_text = 'おかえりなさい';		    break;
+	    case 6: $status_text = '分析中です';			    break;
+            default: $status_text = 'ステータスの取得に失敗しました'; break;
         }
         return $status_text;
     }
@@ -74,7 +68,7 @@ class loader {
         }
         return '<meta charset="utf-8">
         <meta name="application-name" content="' . $site_title . '">
-        <link rel="icon" href="' . $inc_text . './images/favicon.ico">
+        <link rel="icon" href="' . $inc_text . './images/SAL_icon.svg" type="image/svg+xml">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>' . $title . ' - ' . $site_title . '</title>
         <meta name="description" content="' . $site_title . '">

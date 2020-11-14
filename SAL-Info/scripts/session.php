@@ -33,7 +33,7 @@ if ($method == 'POST') {
     $pass = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
 
     //ソルトの取得
-    $result = select(true, "MKTK_USERS", "SALT", "WHERE USERID = '$userid'");
+    $result = select(true, "MKTK_USERS", "SALT", "WHERE BINARY USERID = '$userid'");
     if (!$result) {
         $r_text = -1;
         if (fails_check()) {
@@ -61,12 +61,12 @@ if ($method == 'POST') {
         $hash = hash('sha256', $pass . $salt);
 
         //パスワード認証
-        $result = select(true, "MKTK_USERS", "(PASSWORDHASH = '$hash') AS PASSWORD_MATCHES", "WHERE USERID = '$userid'");
+        $result = select(true, "MKTK_USERS", "(PASSWORDHASH = '$hash') AS PASSWORD_MATCHES", "WHERE BINARY USERID = '$userid'");
         $password_matches = $result['PASSWORD_MATCHES'];
 
         //パスワードがマッチしていたらセッション情報登録
         if ($password_matches) {
-            $result = select(true, "MKTK_USERS", "USERINDEX", "WHERE USERID = '$userid'");
+            $result = select(true, "MKTK_USERS", "USERINDEX", "WHERE BINARY USERID = '$userid'");
             $userindex = $result['USERINDEX'];
 
             //セッションタイム（1500秒）およびセッション情報を出力する

@@ -57,7 +57,7 @@ $logger->Button('bttn_exit', 'ホームに戻る', 'button', 'home', 'orange');
             });
             
             $(document).on('click', '#bttn_exit', function () {
-                window.location.href = 'index.php';
+                animation_to_sites('data_output', 400, './');
             });
         </script>
     </body>

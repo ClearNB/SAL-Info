@@ -57,7 +57,7 @@ $form_failed_02->Button('form_back_form_01', '入力に戻る', 'button', 'caret
         </div>
 
         <div class="bg-primary py-3">
-            <div class="container h-min" id="data_output">
+            <div class="container " id="data_output">
                 <!-- CONTENT OUTPUTS -->
             </div>
         </div>
@@ -80,7 +80,7 @@ $form_failed_02->Button('form_back_form_01', '入力に戻る', 'button', 'caret
                 animation('data_output', 400, fdataw);
                 ajax_dynamic_post('./scripts/session.php', d).then(function(data) {
                     switch(data['res']) {
-                        case 0: window.location.href = 'dash.php'; break;
+                        case 0: animation_to_sites('data_output', 400, './dash.php'); break;
                         case -1: animation('data_output', 400, fdata3);
                         case 1: animation('data_output', 400, fdata2);
                     }

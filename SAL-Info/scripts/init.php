@@ -13,14 +13,16 @@ class initDatabase {
         $result = setTableStatus($format_data['tables'], false);
         
         if ($result) {
-            delete('MKTK_OCCR');
-            delete('MKTK_LS_THEME');
-            delete('MKTK_LS_FIELD');
-            delete('MKTK_LS');
+            delete('MKTK_OCCR'); delete('MKTK_LS_THEME');
+            delete('MKTK_LS_FIELD'); delete('MKTK_USERS_SL');
+	    delete('MKTK_LS_LIST'); delete('MKTK_LS_DATA');
+	    delete('MKTK_LS_TEST'); delete('MKTK_TEST_QS');
+            delete('MKTK_LS'); delete('MKTK_USERS_SET', 'WHERE COMPLETEDFLAG <> 1');
             
             reset_auto_increment('MKTK_OCCR');
             reset_auto_increment('MKTK_LS_THEME');
             reset_auto_increment('MKTK_LS_FIELD');
+	    reset_auto_increment('');
             reset_auto_increment('MKTK_LS');
             $r_flag = true;
             foreach ($format_data['occr'] as $var) { $r_flag = insert('MKTK_OCCR', ['OCCRNAME'], [$var[0]]); if(!$r_flag) { break; } }
