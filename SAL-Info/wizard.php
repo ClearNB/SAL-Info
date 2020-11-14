@@ -98,7 +98,7 @@ $fm_us->Caption('<p id="data"></p>');
 		$(document).on('click', '#bt_st_bk, #bt_st_tb, #bt_st_li', function() {
 		    switch($(this).attr('id')) {
 			case 'bt_st_bk':
-			    animation('data_output', 400, './');
+			    animation_to_sites('data_output', 400, './');
 			    break;
 			case 'bt_st_tb':
 			    animation('data_output', 400, fm_tb);

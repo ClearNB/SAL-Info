@@ -196,7 +196,7 @@ $loader = new loader();
             </div>
         </div>
 
-        <div class="bg-primary py-3">
+        <div class="bg-primary py-3 h-min">
             <div class="container" id="data_output">
                 <!-- CONTENT OUTPUTS -->
             </div>
