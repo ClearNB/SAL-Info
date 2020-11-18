@@ -15,11 +15,15 @@ E-Learningを始めるのに、この一言。<br>
 <table>
   <tr>
     <th>システム名</th>
-    <td>Virtual Control</td>
+    <td>SAL Info</td>
   </tr>
   <tr>
     <th>リリースバージョン</th>
     <td>v1.0.0-beta</td>
+  </tr>
+  <tr>
+    <th>対応OS</th>
+    <td>Ubuntu 20.04 LTS</td>
   </tr>
   <tr>
     <th>対応アプリケーション</th>
@@ -40,5 +44,3 @@ E-Learningを始めるのに、この一言。<br>
     <td>セキュリティ教育での短期教育</td>
   </tr>
 </table>
-
-## システム概要
