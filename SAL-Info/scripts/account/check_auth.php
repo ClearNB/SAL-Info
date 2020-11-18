@@ -26,36 +26,27 @@ include_once ('../dbconfig.php');
 include_once ('../session_chk.php');
 
 if ($method == 'POST') {
-    $pass = filter_input(INPUT_POST, 'a_auth', FILTER_SANITIZE_STRING);
+    $pass = filter_input(INPUT_POST, 'at_pass', FILTER_SANITIZE_STRING);
+    
     $r = 0;
-    $index;
-
-    if (session_chk()) {
-	$r = 2;
+    session_start_once();
+    if (session_chk() != 0) {
+	$r = 1;
     } else {
 	$index = $_SESSION['mktk_userindex'];
 	$result = select(true, "MKTK_USERS", "SALT", "WHERE USERINDEX = $index");
 	if (!$result) {
-	    $r = -1;
-	    echo json_encode(['res' => $r]);
+	    $r = 2;
 	} else {
 	    $salt = $result['SALT'];
-	}
-
-	if ($salt === "") {
-	    $r = -1;
-	    echo json_encode(['res' => $r_text]);
-	} else {
 	    $hash = hash('sha256', $pass . $salt);
-
 	    $result = select(true, "MKTK_USERS", "(PASSWORDHASH = '$hash') AS PASSWORD_MATCHES", "WHERE USERINDEX = $index");
 	    $password_matches = $result['PASSWORD_MATCHES'];
-
 	    if (!$password_matches) {
 		$r = 1;
 	    }
 	}
     }
-    ob_get_clean();
+    //ob_get_clean();
     echo json_encode(['res' => $r]);
 }

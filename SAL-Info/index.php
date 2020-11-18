@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <?php
-include ('./scripts/session_chk.php');
-if (session_chk()) {
-    http_response_code(301);
-    header("Location: dash.php");
-    exit();
-}
-
 include_once './scripts/common.php';
 include_once './scripts/sqldata.php';
 include_once './scripts/dbconfig.php';
 include_once './scripts/former.php';
 include_once './scripts/loader.php';
+include_once './scripts/session_chk.php';
+
+switch(session_chk()) {
+    case 0: http_response_code(301); header('Location: ./dash.php'); exit(); break;
+    case 1: if(!user_table_check()) { http_response_code(301); header('Location: ./init_d.php'); exit(); } break;
+    case 2: if(!user_table_check()) { http_response_code(301); header('Location: ./init_d.php'); exit(); } break;
+}
+
 $loader = new loader();
 
 $fm = new form_generator('fm');
@@ -53,7 +54,7 @@ $fm->closeDiv();
 	
 	<script type="text/javascript">
 	    $(document).ready(function() {
-		animation('data_output', 400, fm);
+		animation('data_output', 0, fm);
 	    });
 	    
 	    $(document).on('click', '#learn', function() {

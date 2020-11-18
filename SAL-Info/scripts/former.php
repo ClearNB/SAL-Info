@@ -55,6 +55,15 @@ class form_generator {
 	array_push($this->data,
 		"<div class=\"form-group\"><hr><div>$caption</div><hr></div>");
     }
+    
+    /**
+     * 説明を作成します
+     * @param type $caption
+     */
+    function CaptionLg($caption) {
+	array_push($this->data,
+		"<div class=\"form-group py-3\"><hr><div>$caption</div><hr></div>");
+    }
 
     /**
      * 背景をタイトル系にカバーします
@@ -94,11 +103,13 @@ class form_generator {
      * @param type $small_desc	    下部に小さな説明を加えます
      * @param type $icon	    アイコン情報です
      * @param type $required	    【任意（def: true）】入力必要かを入力します（true or false）
-     * @param type $auto_completed  【任意（def: false）】補完入力を可能にするか判定します（true of face）
+     * @param type $auto_completed  【任意（def: false）】補完入力を可能にするか判定します（true or false）
+     * @param type $eye_modify      【任意（def: true）】表示用ボタンを表示させます（true or false）
      */
-    function Password($id, $desc, $small_desc, $icon, $required = true, $auto_completed = false) {
+    function Password($id, $desc, $small_desc, $icon, $required = true, $auto_completed = false, $eye_modify = true) {
 	$r_text = "任意";
 	$r_flag = "";
+	$m_text = "";
 	if ($required) {
 	    $r_text = "必須";
 	    $r_flag = "required=\"required\"";
@@ -108,7 +119,10 @@ class form_generator {
 	} else {
 	    $r_flag .= " autocomplete=\"off\"";
 	}
-	array_push($this->data, "<div class=\"form-group pt-2\"><label class=\"importantLabel col-md-3\">【" . $r_text . "】</label><label class=\"formtext col-md-8\">$desc<i class=\"fa fa-$icon fa-2x ml-2\"></i></label><input type=\"password\" class=\"form-control bg-dark my-1 form-control-lg shadow-sm text-monospace\" placeholder=\"Input Here\" $r_flag id=\"$id\" name=\"$id\"><small class=\"form-text text-body\">$small_desc</small></div>");
+	if($eye_modify) {
+	    $m_text = '<span class="field-icon"><i toggle="#password-field" class="fa fa-eye toggle-password"></i></span>';
+	}
+	array_push($this->data, "<div class=\"form-group pt-2\"><label class=\"importantLabel col-md-3\">【" . $r_text . "】</label><label class=\"formtext col-md-8\">$desc<i class=\"fa fa-$icon fa-2x ml-2\"></i></label><input type=\"password\" class=\"form-control bg-dark my-1 form-control-lg shadow-sm text-monospace\" placeholder=\"Input Here\" $r_flag id=\"$id\" name=\"$id\">$m_text<small class=\"form-text text-body\">$small_desc</small></div>");
     }
 
     /**

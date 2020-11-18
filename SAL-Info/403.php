@@ -5,15 +5,16 @@ include_once './scripts/sqldata.php';
 include_once './scripts/dbconfig.php';
 include_once './scripts/former.php';
 include_once './scripts/loader.php';
+include_once './scripts/session_chk.php';
+
+switch(session_chk()) {
+    case 0: http_response_code(301); header('Location: ./dash.php'); exit(); break;
+    case 1: break;
+    case 2: if(user_table_check()) { http_response_code(301); header('Location: ./init_d.php'); exit(); } break;
+}
 
 $loader = new loader();
-
-/* Title Data */
-
 $logger = new form_generator('logger');
-
-include ('./scripts/session_chk.php');
-session_start();
 if (fails_check()) {
     $logger->SubTitle("ログイン不可", "あなたは一定時間以内に指定ログイン試行回数以上の試行を行いました。<br>しばらくしてからもう一度試行してください。", "times-circle");
 } else {

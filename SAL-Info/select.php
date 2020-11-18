@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <?php
-include_once __DIR__ . '/scripts/common.php';
-include_once __DIR__ . '/scripts/sqldata.php';
-include_once __DIR__ . '/scripts/dbconfig.php';
-include_once __DIR__ . '/scripts/former.php';
-include_once __DIR__ . '/scripts/loader.php';
+include_once './scripts/common.php';
+include_once './scripts/sqldata.php';
+include_once './scripts/dbconfig.php';
+include_once './scripts/former.php';
+include_once './scripts/confirmls.php';
+include_once './scripts/loader.php';
+include_once './scripts/session_chk.php';
 
-include ('./scripts/session_chk.php');
-if (!session_chk()) {
-    http_response_code(403);
-    header('Location: ./403.php');
-    exit();
+switch(session_chk()) {
+    case 0: break;
+    case 1: http_response_code(403); header('Location: ./403.php'); exit(); break;
+    case 2: http_response_code(301); header('Location: ./logout.php'); exit(); break;
 }
 $loader = new loader();
 
 $index = $_SESSION['mktk_userindex'];
 $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE USERINDEX = $index");
 
-include_once './scripts/confirmls.php';
 switch(confirm_lessondata($index)) {
     case 0: http_response_code(301); header('Location: ./lesson.php'); exit(); break;
     case 3: case 4: http_response_code(301); header('Location: ./test.php'); exit(); break;
@@ -119,7 +119,6 @@ $form_completed->Button('bttn_exit_con', 'ホームに戻る', 'button', 'home',
             var fdata5 = '<?php echo $former_wait->Export() ?>';
             var fdata6 = '<?php echo $former_pro->Export() ?>';
             var fdata7 = '<?php echo $form_failed->Export() ?>';
-            var fdata8 = '<?php echo $form_failed02->Export() ?>';
             var fdata9 = '<?php echo $form_completed->Export() ?>';
             let arr_wk = <?php echo json_encode($occr_array) ?>;
             let arr_yr = ['', '勤務から1年未満', '勤務から1年以上'];
@@ -135,7 +134,7 @@ $form_completed->Button('bttn_exit_con', 'ホームに戻る', 'button', 'home',
             </div>
         </div>
 
-        <div class="bg-primary h-min py-3">
+        <div class="bg-primary py-3">
             <div class="container" id="data_output">
                 <!-- CONTENT OUTPUTS -->
             </div>
@@ -175,7 +174,7 @@ $form_completed->Button('bttn_exit_con', 'ホームに戻る', 'button', 'home',
                 animation('data_output', 400, fdata2);
             });
             $(document).on('click', '#bttn_exit, #bttn_exit_con', function () {
-                window.location.href = 'index.php';
+                animation_to_sites('data_output', 400, './');
             });
 
             //Form Page : 2
@@ -219,7 +218,6 @@ $form_completed->Button('bttn_exit_con', 'ホームに戻る', 'button', 'home',
                     $('#data_output').append('<div id="error_content" class="failedMessage text-monospace">エラー: どれか1つを選択してください。</div>');
                 } else {
                     var data = check.val();
-                    console.log(data);
                     if (formdata['workyrvalue'] !== data) {
                         formdata['workyrvalue'] = "wk_yr=" + data;
                         formdata['workyrvalue_row'] = data;
@@ -275,7 +273,7 @@ $form_completed->Button('bttn_exit_con', 'ホームに戻る', 'button', 'home',
                         if (data['res'] === 0) {
                             animation('data_output', 400, fdata9);
                         } else {
-                            animation('data_output', 400, fdata8);
+                            animation('data_output', 400, fdata7);
                         }
                     });
                 });
@@ -295,6 +293,10 @@ $form_completed->Button('bttn_exit_con', 'ホームに戻る', 'button', 'home',
                 animation('data_output', 400, fdata4);
             });
             
+	    //Completed : 8
+	    $(document).on('click', '#bttn_begin_con', function() {
+		animation_to_sites('data_output', 400, './test.php');
+	    });
             
         </script>
     </body>

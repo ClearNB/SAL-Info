@@ -9,24 +9,24 @@
  */
 
 //テーブルの状態を把握し、存在しない場合は作成を試みます。
-function setTableStatus($tables, $isText = false) {
+function setTableStatus($tables) {
     $r = true;
-    $true_table = '【存在する表】</br>';
-    $false_table = '【存在しない表】</br>';
     foreach ($tables as $var) {
-        $query = "SELECT * FROM $var[0]";
-        $data = query($query);
-        //テーブルがある場合・ない場合
-        if ($data) {
-            $true_table = $true_table . $var[0] . '<br>';
-        } else {
-            $false_table = $true_table . $var[0] . '<br>';
-            $data = createTable($var[0], $var[1]);
-        }
-        $r = $r && $data;
-    }
-    if ($isText) {
-        print $true_table . '<hr>' . $false_table;
+	$query = "SELECT * FROM $var[0]";
+	$data = query($query);
+	//テーブルがある場合・ない場合
+	if (!$data) {
+	    $data = createTable($var[0], $var[1]);
+	    if ($var[0] == 'MKTK_USERS') {
+		$salt = random(20);
+		$hash = hash('sha256', 'UserPass01' . $salt);
+		$sql01 = insert('MKTK_USERS', ['USERID', 'USERNAME', 'PASSWORDHASH', 'PERMISSION', 'SALT'], ['user01', 'User01', $hash, 1, $salt]);
+		if (!$sql01) {
+		    $data = false;
+		}
+	    }
+	}
+	$r = $r && $data;
     }
     return $r;
 }
@@ -40,9 +40,9 @@ function createTable($table, $column) {
 function insert($table, $column, $value) {
     $column_text = implode($column, ', ');
     for ($i = 0; $i < sizeof($value); $i++) {
-        if (gettype($value[$i]) === 'string') {
-            $value[$i] = "'" . $value[$i] . "'";
-        }
+	if (gettype($value[$i]) === 'string') {
+	    $value[$i] = "'" . $value[$i] . "'";
+	}
     }
     $value_text = implode($value, ", ");
     $query = "INSERT INTO $table ($column_text) VALUES ($value_text)";
@@ -58,7 +58,11 @@ function insert_select($table, $column, $select) {
 }
 
 function update($table, $column, $value, $where = '') {
-    $query = "UPDATE $table SET $column = $value $where";
+    $text = $value;
+    if (gettype($text) === 'string') {
+	$text = "'" . $text . "'";
+    }
+    $query = "UPDATE $table SET $column = $text $where";
     $result = query($query);
     return $result;
 }
@@ -70,14 +74,10 @@ function delete($table, $where = '') {
 }
 
 function select($one_column, $table, $column, $other = '') {
-    $query = "
-            SELECT $column
-            FROM   $table
-            $other
-    ";
+    $query = "SELECT $column FROM $table $other";
     $result = query($query);
     if ($one_column && $result) {
-        $result = $result->fetch_assoc();
+	$result = $result->fetch_assoc();
     }
     return $result;
 }

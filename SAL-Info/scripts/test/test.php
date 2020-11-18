@@ -1,44 +1,5 @@
 <?php
 
-/* [TESTのデータの送出を行います]
- * 
- * ●順序について
- * 0. セッションを読み取れるか確認します
- * 1. セッション情報を読み取ります（初期値参考）
- * 2-1. セッションがあれば以下の処理を行います
- *  2-1-1. ファンクション番号を読み取ります
- *  [ファンクション番号: 1 ▶ 【初期化】]
- * 2-2. セッションがなければ【初期化】を行います
- * 3. 【読み取り】 ※この時点でエラーがある場合、行いません
- * 
- * 【読み取り】
- *  F1-1. S -> "mktt_test_count" as $a を呼び出します
- *  F1-2. S ->  
- * 
- * 【初期化】
- *  F2-1. セッション情報の登録のために、問題作成を行います (./test_generate.php->generate_quiz)
- *  F2-2. エラーがなければその情報をセッションに登録します
- *  
- * ●セッションについて
- * ・セッション情報は、問題データの保存を行います
- * ・途中でセッション情報内にデータがない場合、テストを中断します
- * ・セッション情報は、テストを始めた際、またはテスト終了後に初期化（もしくは破棄）されます
- * [セッション初期値]
- * S -> "mktk_test_count" : 1
- * S -> "mktk_test_max_count" : n
- * S -> "mktk_test_ques_data" : ['t_data'][0..n], ['t_cid'][0..n]
- * ※ques_data は多層化連想配列になっています
- * 
- * ●フラグについて
- * 1: 問題を送出します
- * R -> "code" : 1
- * R -> "data" : ques = '...'
- * S -> "count" : +1
- * 2: 問題がの送出が終了しました（result結果が送出）
- *   -> 
- * 3: データベースエラー
- */
-
 $requestmg = filter_input(INPUT_SERVER, 'HTTP_X_REQUESTED_WITH');
 
 $request = isset($requestmg) ? strtolower($requestmg) : '';
@@ -52,25 +13,70 @@ include_once ('../sqldata.php');
 include_once ('../common.php');
 include_once ('../dbconfig.php');
 include_once ('../session_chk.php');
-include_once ('checkers.php');
+include_once ('./test_generate.php');
 
 $method = filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING);
 if ($method === 'POST') {
+    //f_num ... 1 (初期化・ロード), 2（次の問題へ）
     $functionid = filter_input(INPUT_POST, 'f_num', FILTER_SANITIZE_STRING);
+    $answer = filter_input(INPUT_POST, 'f_ans', FILTER_SANITIZE_STRING);
+    if(!$functionid) {
+	$functionid = 1;
+    }
+    if(!$answer) {
+	$answer = '';
+    }
     $code = 0;
     
+    //1: Confirm to Initialize
     session_start_once();
-    if(isset($_SESSION['mktk_test_count']) && isset($_SESSION['mktk_test_max_count']) && isset($_SESSION['mktk_test_ques_data'])) {
+    $result = true;
+    $d = '';
+    if(isset($_SESSION['mktk_test']) && session_chk() == 0) {
 	if($functionid == 1) {
-	    
+	    $result = initializeQuiz();
 	}
-    } else if(isset($_SESSION['mktk_userindex'])) {
-	initializeQuiz();
+    } else if(session_chk() == 0) {
+	$result = initializeQuiz();
     } else {
-	$code = 1;
+	$d = ['code'=>1];
     }
+    if($result) {
+	//2: Get the Object.
+        $obj = $_SESSION['mktk_test'];
+	if($functionid == 2) {
+	    $obj->setAns($answer);
+	    $_SESSION['mktk_test'] = $obj;
+	}
+	$data = $obj->getQues();
+	if($data == 2) {
+	    $r = $obj->getResult();
+	    if(!$r) {
+		$d = ['code'=>1];
+	    } else {
+		$d = ['code'=>$data, 'html'=>$r['html'], 'score'=>$r['score'], 'time'=>$r['time']];
+	    }
+	} else {
+	    $d = ['code'=>$code, 'ques'=>$data['ques'], 'count'=>$obj->getCount(), 'max_count'=>$obj->getMax()];
+	}
+    } else {
+	$d = ['code'=>1];
+    }
+    //ob_get_clean();
+    echo json_encode($d);
 }
 
-function initializeQuiz() {
-    $userid = filter_input(INPUT_POST, 'cr_userid', FILTER_SANITIZE_STRING);
+function initializeQuiz() { 
+    unset($_SESSION['mktk_test']);
+    
+    $index = $_SESSION['mktk_userindex'];
+    
+    $select = select(true, 'MKTK_USERS_SET', 'MAX(SETID) AS SETID', 'WHERE USERINDEX = ' . $index);
+    if($select) {
+	$quiz = new Quiz($select['SETID']);
+	$_SESSION['mktk_test'] = $quiz;
+	return true;
+    } else {
+	return false;
+    }
 }

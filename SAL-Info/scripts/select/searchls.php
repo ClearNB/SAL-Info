@@ -43,11 +43,11 @@ if ($method === 'POST') {
                     $data['COUNT'] += 1;
                 }
             }
-            echo json_encode(['res'=>$data]);
-        }
-
+        } else {
+	    $data = "該当データなし";
+	}
     } else {
-        $theme_data = "該当データなし";
-        echo json_encode(["res"=>$theme_data]);
+        $data = "該当データなし";
     }
+    echo json_encode(["res"=>$data]);
 }

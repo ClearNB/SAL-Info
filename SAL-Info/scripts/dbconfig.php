@@ -4,7 +4,7 @@ static $mysqli;
 
 function get_db() {
     try {
-        $data = loadfile("SAL/data/database.json");
+        $data = loadfile("data/database.json");
 
         $HOST = $data['host'];
         $USERNAME = $data['user'];

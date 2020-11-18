@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <?php
-include ('./scripts/session_chk.php');
-if(session_chk()) {
-    http_response_code(301);
-    header("Location: dash.php");
-    exit();
-}
-
 include_once './scripts/common.php';
 include_once './scripts/sqldata.php';
 include_once './scripts/dbconfig.php';
 include_once './scripts/former.php';
 include_once './scripts/loader.php';
+include_once './scripts/session_chk.php';
+
+switch(session_chk()) {
+    case 0: http_response_code(301); header('Location: ./dash.php'); exit(); break;
+    case 1: if(!user_table_check()) { http_response_code(301); header('Location: ./init_d.php'); exit(); } break;
+    case 2: if(!user_table_check()) { http_response_code(301); header('Location: ./init_d.php'); exit(); } break;
+}
 
 $loader = new loader();
 $form = new form_generator('login_form');
@@ -21,7 +21,7 @@ $form->Password('password', 'パスワード', '指定のパスワードを入�
 $form->Button('form_submit', 'ログイン', 'submit', 'sign-in');
 
 $form_wait = new form_generator('form_wait');
-$form_wait->SubTitle("セッション中です。", "そのままお待ちください...", "spinner");
+$form_wait->SubTitle("セッション中です。", "そのままお待ちください...", "spinner fa-spin");
 
 $form_failed_01 = new form_generator('form_failed01');
 $form_failed_01->SubTitle("ログインに失敗しました。", "ユーザIDまたはパスワードが違います", "exclamation-triangle");

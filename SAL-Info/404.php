@@ -8,6 +8,11 @@ include_once './scripts/loader.php';
 
 $loader = new loader();
 
+$select = select(true, 'MKTK_USERS', 'COUNT(*) AS COUNT');
+if(!$select['COUNT']) {
+    header("Location: init_d.php");
+}
+
 /* Content Data */
 $logger = new form_generator('logger');
 $logger->SubTitle("表示エラー", "要求されたページは存在しません。", "times-circle");
@@ -41,10 +46,7 @@ $logger->Button('bttn_exit', 'ホームに戻る', 'button', 'home', 'orange');
 
         <?php echo $loader->Footer() ?>
 
-        <script src="./js/jquery.js"></script>
-        <script src="./jquery/jquery-ui.js"></script>
-        <script src="./js/popper.min.js"></script>
-        <script src="./js/bootstrap.min.js"></script>
+        <?php echo $loader->loadFootS() ?>
         <script type="text/javascript">
             $(document).ready(function () {
                 animation('data_output', 0, logger);

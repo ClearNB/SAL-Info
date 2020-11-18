@@ -8,9 +8,7 @@ $(document).on('change', 'input[name="index-s"]', function () {
         var changeFlag = $(this).prop("checked");
         $("#account_table input:checkbox").prop("checked", changeFlag);
     } else {
-        var c_none_checked = $("#account-data input:checkbox").length
-		- $("#account-data input:checkbox:checked").length - s - 1;
-	console.log(c_none_checked);
+        var c_none_checked = $('input[name="index-s"]').not(':checked, #index-0').length;
         if (c_none_checked === 0) {
             $('#index-0').prop('checked', true);
             s = 1;
@@ -20,14 +18,14 @@ $(document).on('change', 'input[name="index-s"]', function () {
         }
     }
     var c_checked = $("#account_table input:checkbox:checked").length - s;
-    console.log(c_checked);
     if (c_checked > 0) {
         if (c_checked === 1) {
             $('#bt_ac_ed').prop("disabled", false);
+	    $('#bt_ac_dl').prop("disabled", false);
         } else {
             $('#bt_ac_ed').prop("disabled", true);
+	    $('#bt_ac_dl').prop("disabled", true);
         }
-        $('#bt_ac_dl').prop("disabled", false);
     } else {
         $('#bt_ac_ed').prop("disabled", true);
         $('#bt_ac_dl').prop("disabled", true);

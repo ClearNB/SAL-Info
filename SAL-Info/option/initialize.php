@@ -7,20 +7,18 @@
  * - Desc: {host}/option/account.php
  * - Launguage: Japanese
  */
-
-include ('../scripts/session_chk.php');
-session_start();
-if(!session_chk()) {
-    http_response_code(301);
-    header('location: ../403.php');
-    exit();
-}
-
 include_once '../scripts/common.php';
 include_once '../scripts/sqldata.php';
 include_once '../scripts/dbconfig.php';
 include_once '../scripts/former.php';
 include_once '../scripts/loader.php';
+include_once '../scripts/session_chk.php';
+
+switch(session_chk()) {
+    case 0: break;
+    case 1: http_response_code(403); header('Location: ../403.php'); exit(); break;
+    case 2: http_response_code(301); header('Location: ../logout.php'); exit(); break;
+}
 
 $index = $_SESSION['mktk_userindex'];
 $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX = $index");
@@ -105,7 +103,7 @@ $loader = new loader();
         
         <script type="text/javascript">
             $(document).ready(function() {
-                animation('data_output', 400, fm_cf);
+                animation('data_output', 0, fm_cf);
             });
             
             $(document).on('click', '#bttn_back_cf, #bttn_back_fl, #bttn_back_cp', function() {

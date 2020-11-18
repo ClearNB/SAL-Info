@@ -8,20 +8,19 @@
  * - Launguage: Japanese
  */
 
-include ('../scripts/session_chk.php');
-session_start();
-if (!session_chk()) {
-    http_response_code(301);
-    header('location: ../403.php');
-    exit();
-}
-
 include_once '../scripts/common.php';
 include_once '../scripts/sqldata.php';
 include_once '../scripts/dbconfig.php';
 include_once '../scripts/former.php';
 include_once '../scripts/loader.php';
 include_once '../scripts/table_generator.php';
+include_once '../scripts/session_chk.php';
+
+switch(session_chk()) {
+    case 0: break;
+    case 1: http_response_code(403); header('Location: ../403.php'); exit(); break;
+    case 2: http_response_code(301); header('Location: ../logout.php'); exit(); break;
+}
 
 $index = $_SESSION['mktk_userindex'];
 $getdata = select(true, "MKTK_USERS", "USERNAME, PERMISSION", "WHERE  USERINDEX = $index");
@@ -41,7 +40,7 @@ if (!$data) {
 $fm_ac->Caption($data . '【操作方法】<ul class="title-view">'
 	. '<li><i class="fa fa-user-plus"></i>作成 ... 以下の【作成】ボタンを押してください。</li>'
 	. '<li><i class="fa fa-pencil-square-o"></i>編集 ... 一覧表隣のチェックボックスに1件だけ選択し、【編集】ボタンを押してください。</li>'
-	. '<li><i class="fa fa-trash"></i>削除 ... 一覧表隣のチェックボックスに自分以外の該当部分を選択し、【削除】ボタンを押してください。'
+	. '<li><i class="fa fa-trash"></i>削除 ... 一覧表隣のチェックボックスに1件だけ選択し、【削除】ボタンを押してください。'
 	. '<li><i class="fa fa-chevron-circle-left"></i>戻る ... 設定一覧へ戻ります。</li>'
 	. '</ul>');
 $fm_ac->Button('bt_ac_cr', '作成', 'button', 'user-plus');
@@ -73,7 +72,12 @@ $fm_ed->Button('bt_ed_bk', 'アカウント一覧へ戻る', 'button', 'chevron-
 
 //Delete user
 $fm_dl = new form_generator('fm_dl');
-$fm_dl->SubTitle('削除', '[USER_LIST]', 'pencil-square-o');
+$fm_dl->SubTitle('対象のユーザ: [USER]', '以上のユーザを削除します。', 'pencil-square-o');
+$fm_dl->openList();
+$fm_dl->addList('この削除により、ユーザ情報および研修情報、テスト情報、ならびに研修履歴・テスト履歴のすべてが削除されます。');
+$fm_dl->addList('削除には管理者権限が必要です。');
+$fm_dl->addList('必ずそのユーザがログアウトしていることを確認してください。');
+$fm_dl->closeList();
 $fm_dl->openRow();
 $fm_dl->Button('bt_dl_sb', '削除する', 'button', 'address-card');
 $fm_dl->Button('bt_dl_bk', 'アカウント一覧へ戻る', 'button', 'chevron-circle-left', 'gray');
@@ -82,7 +86,7 @@ $fm_dl->closeDiv();
 //Completed
 $fm_cc = new form_generator('fm_cc');
 $fm_cc->SubTitle("設定完了しました！", "下記ボタンでアカウント一覧へ遷移します。", "thumbs-up");
-$fm_cc->Button('bt_cc_bk', 'アカウント一覧へ戻る', false, 'chevron-circle-left', 'gray');
+$fm_cc->Button('bt_cc_bk', 'アカウント一覧へ戻る', 'button', 'chevron-circle-left', 'gray');
 
 //Authentication
 $fm_at = new form_generator('fm_at');
@@ -96,7 +100,7 @@ $fm_at->closeDiv();
 //Change UserID
 $fm_ch_i = new form_generator('fm_ch_i');
 $fm_ch_i->SubTitle('対象のユーザ: [USER]', '以下よりユーザIDを変更してください。', 'pencil-square-o');
-$fm_ch_i->Input('ch_i_n_ui', 'あなたの新しいユーザID', '最大20文字, 重複なし, 半角英数字', 'user', true);
+$fm_ch_i->Input('ch_i_n_ui', '新しいユーザID', '最大20文字, 重複なし, 半角英数字', 'user', true);
 $fm_ch_i->openRow();
 $fm_ch_i->Buttonx2('bt_ch_i_sb', 'ユーザ名を変更', 'submit', 'check-circle', 'orange');
 $fm_ch_i->Buttonx2('bt_ch_i_bk', 'キャンセル', 'button', 'chevron-circle-left', 'gray');
@@ -105,7 +109,7 @@ $fm_ch_i->closeDiv();
 //Change UserName
 $fm_ch_n = new form_generator('fm_ch_n');
 $fm_ch_n->SubTitle('対象のユーザ: [USER]', '以下よりユーザ名を変更してください。', 'pencil-square-o');
-$fm_ch_n->Input('ch_n_n_un', 'あなたの新しいユーザ名', '半角最大30文字, 全角最大15文字', 'address-card', true);
+$fm_ch_n->Input('ch_n_n_un', '新しいユーザ名', '半角最大30文字, 全角最大15文字', 'address-card', true);
 $fm_ch_n->openRow();
 $fm_ch_n->Buttonx2('bt_ch_n_sb', 'ユーザ名を変更', 'submit', 'check-circle', 'orange');
 $fm_ch_n->Buttonx2('bt_ch_n_bk', 'キャンセル', 'button', 'chevron-circle-left', 'gray');
@@ -130,7 +134,7 @@ $fm_cf->Button('bt_cf_bk', 'キャンセル', 'button', 'chevron-circle-left', '
 
 //Loading
 $fm_wt = new form_generator('fm_we');
-$fm_wt->SubTitle("セッション中です。", "そのままお待ちください...", "spinner");
+$fm_wt->SubTitle("セッション中です。", "そのままお待ちください...", "spinner fa-spin");
 
 //Failed : confirm
 $fm_fl_cf = new form_generator('fm_fl_cf');
@@ -151,12 +155,12 @@ $fm_fl_dt->Caption("<h3 class=\"py-1 md-0\">【警告】</h3><ul class=\"title-v
 $fm_fl_dt->Button('bt_fl_dt_bk', 'アカウント一覧に戻る', 'button', 'caret-square-o-left', 'gray');
 
 //Failed : checked
-$fm_fl_ck = new form_generator('fm_fl_dt');
+$fm_fl_ck = new form_generator('fm_fl_ck');
 $fm_fl_ck->SubTitle("手続きに失敗しました。", "選択を正しく行ってください", "exclamation-triangle");
 $fm_fl_ck->Caption("<h3 class=\"py-1 md-0\">【警告】</h3>"
 	. "<ul class=\"title-view\">"
-	. "<li>【編集】では、選択できる人数は1人のみです</li>"
-	. "<li>【削除】では、自分自身の選択はできません</li>"
+	. "<li>・【編集】【削除】で選択できる人数は1人のみです</li>"
+	. "<li>・自分自身の選択はできません</li>"
 	. "</ul>");
 $fm_fl_ck->Button('bt_fl_dt_bk', 'アカウント一覧に戻る', 'button', 'caret-square-o-left', 'gray');
 
@@ -180,8 +184,10 @@ $loader = new loader();
 	    var fm_cf = '<?php echo $fm_cf->Export() ?>';
 	    var fm_fl_cf = '<?php echo $fm_fl_cf->Export() ?>';
 	    var fm_fl_dt = '<?php echo $fm_fl_dt->Export() ?>';
+	    var fm_fl_at = '<?php echo $fm_fl_at->Export() ?>';
+	    var fm_fl_ck = '<?php echo $fm_fl_ck->Export() ?>';
 	    var data_array = {};
-	    var fm_cf_w, fm_fl_cf_w, fm_fl_dt_w, fm_ch_w;
+	    var fm_w, fm_w2;
         </script>
     </head>
 
@@ -196,7 +202,7 @@ $loader = new loader();
             </div>
         </div>
 
-        <div class="bg-primary py-3 h-min">
+        <div class="bg-primary py-3">
             <div class="container" id="data_output">
                 <!-- CONTENT OUTPUTS -->
             </div>
@@ -207,50 +213,156 @@ $loader = new loader();
 	<?php echo $loader->loadFootS(true) ?>
 
         <script type="text/javascript">
+	    /* data_array
+	     * ['c_data'] -> Input Data
+	     * ['Function'] -> 1:CREATE, 2:EDIT(DUMMY), 3:CHANGE_USERID, 4:CHANGE_USERNAME, 5:CHANGE_PASSWORD, 6:DELETE
+	     */
+	    
 	    //ドキュメント読込完了時
 	    $(document).ready(function () {
-		animation('data_output', 400, fm_ac);
+		animation('data_output', 0, fm_ac);
 	    });
 
-	    //ACCOUNTS
+	    //ACCOUNTS - button
 	    $(document).on('click', '#bt_ac_cr, #bt_ac_ed, #bt_ac_dl', function () {
-		switch($(this).attr('id')) {
-		    case "bt_ac_cr": animation('data_output', 400, fm_cr); break;
+		switch ($(this).attr('id')) {
+		    case "bt_ac_cr":
+			animation('data_output', 400, fm_cr);
+			break;
 		    case "bt_ac_ed":
-			animation('data_output', 400, fm_ed);
+			var d = $('input[name="index-s"]').not('#index-0').serializeArray();
+			animation('data_output', 400, fm_wt);
+			ajax_dynamic_post('../scripts/account/checklist.php', d).then(function (data) {
+			    switch (data['code']) {
+				case 0:
+				    data_array['a_name'] = data['a_name'];
+				    data_array['u_d'] = data['data'];
+				    fm_w = fm_ed.replace('[USER]', data['data']['USERNAME']);
+				    animation('data_output', 400, fm_w);
+				    break;
+				case 1:
+				    animation('data_output', 400, fm_fl_dt);
+				    break;
+				case 2:
+				    animation('data_output', 400, fm_fl_ck);
+				    break;
+			    }
+			});
 			break;
 		    case "bt_ac_dl":
-			animation('data_output', 400, fm_dl);
+			data_array['function'] = 6;
+			var d = $('input[name="index-s"]').not('#index-0').serializeArray();
+			animation('data_output', 400, fm_wt);
+			ajax_dynamic_post('../scripts/account/checklist.php', d).then(function (data) {
+			    switch (data['code']) {
+				case 0:
+				    data_array['a_name'] = data['a_name'];
+				    data_array['u_d'] = data['data'];
+				    fm_w = fm_dl.replace('[USER]', data['data']['USERNAME']);
+				    animation('data_output', 400, fm_w);
+				    break;
+				case 1:
+				    animation('data_output', 400, fm_fl_dt);
+				    break;
+				case 2:
+				    animation('data_output', 400, fm_fl_ck);
+				    break;
+			    }
+			});
 			break;
 		}
 	    });
 
-	    //CREATE
+	    //Create - Submit
 	    $(document).on('submit', '#fm_cr', function (event) {
 		event.preventDefault();
-		data_array["c_data"] = $('#fm_cr').serialize();
+		data_array["c_data"] = $(this).serialize();
 		data_array['function'] = 1;
-		ajax_dynamic_post('../scripts/account/check_account.php', "f_num=" + data_array['function'] + data_array['c_data']).then(function (data) {
+		animation('data_output', 400, fm_wt);
+		ajax_dynamic_post('../scripts/account/check_account.php', "f_num=" + data_array['function'] + '&' + data_array['c_data']).then(function (data) {
 		    switch (data['res']) {
 			case 0:
-			    fm_cf_w = fm_cf.replace('<p id="confirm"></p>', data['data']);
-			    animation('data_output', 400, fm_at);
+			    fm_w2 = fm_cf.replace('<p id="confirm"></p>', data['data']);
+			    fm_w = fm_at.replace('[USER]', data['auth_name']);
+			    animation('data_output', 400, fm_w);
 			    break;
 			case 1:
-			    fm_fl_cf_w = fm_fl_cf.replace('<p id="confirm"></p>', data['data']);
-			    animation('data_output', 400, fm_fl_cf_w);
+			    fm_w = fm_fl_cf.replace('<p id="confirm"></p>', data['data']);
+			    animation('data_output', 400, fm_w);
 			    break;
 		    }
 		});
 	    });
+
+	    //EDIT - Button
+	    $(document).on('click', '#bt_ed_i, #bt_ed_n, #bt_ed_p', function() {
+		switch($(this).attr('id')) {
+		    case "bt_ed_i":
+			fm_w = fm_ch_i;
+			break;
+		    case "bt_ed_n":
+			fm_w = fm_ch_n;
+			break;
+		    case "bt_ed_p":
+			fm_w = fm_ch_p;
+			break;
+		}
+		fm_w = fm_w.replace('[USER]', data_array['u_d']['USERNAME']);
+		animation('data_output', 400, fm_w);
+	    });
 	    
-	    //EDIT
-	    
-	    
-	    //DELETE
-	    
+	    //Change - Submit
+	    $(document).on('submit', '#fm_ch_i, #fm_ch_n, #fm_ch_p', function() {
+		event.preventDefault();
+		switch($(this).attr('id')) {
+		    case 'fm_ch_i': data_array['function'] = 3; break;
+		    case 'fm_ch_n': data_array['function'] = 4; break;
+		    case 'fm_ch_p': data_array['function'] = 5; break;
+		}
+		data_array["c_data"] = $(this).serialize();
+		animation('data_output', 400, fm_wt);
+		ajax_dynamic_post('../scripts/account/check_account.php', "f_num=" + data_array['function'] + '&' + data_array['c_data']).then(function (data) {
+		    switch (data['res']) {
+			case 0:
+			    fm_w2 = fm_cf.replace('<p id="confirm"></p>', data['data']);
+			    fm_w = fm_at.replace('[USER]', data['auth_name']);
+			    animation('data_output', 400, fm_w);
+			    break;
+			case 1:
+			    fm_w = fm_fl_cf.replace('<p id="confirm"></p>', data['data']);
+			    animation('data_output', 400, fm_w);
+			    break;
+		    }
+		});
+	    });
+
+	    //DELETE - Button
+	    $(document).on('click', '#bt_dl_sb', function () {
+		data_array['function'] = 6;
+		fm_w2 = fm_cf.replace('<p id="confirm"></p>', '<ul class="title-view"><li>削除ユーザ: ' + data_array['u_d']['USERNAME'] + '</li></ul>');
+		fm_w = fm_at.replace('[USER]', data_array['a_name']);
+		animation('data_output', 400, fm_w);
+	    });
+
 	    //Authentication
-	    
+	    $(document).on('submit', '#fm_at', function () {
+		event.preventDefault();
+		var d = $(this).serialize();
+		animation('data_output', 400, fm_wt);
+		ajax_dynamic_post('../scripts/account/check_auth.php', d).then(function (data) {
+		    switch (data['res']) {
+			case 0:
+			    animation('data_output', 400, fm_w2);
+			    break;
+			case 1:
+			    animation('data_output', 400, fm_fl_at);
+			    break;
+			case 2:
+			    animation('data_output', 400, fm_fl_dt);
+			    break;
+		    }
+		});
+	    });
 
 	    //back to Account
 	    $(document).on('click', '#bt_cr_bk, #bt_ed_bk, #bt_dl_bk, #bt_cc_bk, #bt_fl_dt_bk, #bt_fl_at_bk', function () {
@@ -266,36 +378,84 @@ $loader = new loader();
 			ajax_dynamic_post('../scripts/account/ch_create.php', data_array['c_data']).then(function (data) {
 			    data_array = {};
 			    switch (data['res']) {
-				case 0: animation('data_output', 400, fm_cc); break;
-				case 1: animation('data_output', 400, fm_fl_dt); break;
+				case 0:
+				    animation('data_output', 400, fm_cc);
+				    break;
+				case 1:
+				    animation('data_output', 400, fm_fl_dt);
+				    break;
 			    }
 			});
 			break;
-		    case 2:
-			break;
 		    case 3:
-			break;
 		    case 4:
+		    case 5:
+			animation('data_output', 400, fm_wt);
+			ajax_dynamic_post('../scripts/account/ch_change.php', "ch_in=" + data_array['u_d']['USERINDEX'] + "&" + "f_num=" + data_array['function'] + "&" + data_array['c_data']).then(function (data) {
+			    data_array = {};
+			    switch (data['res']) {
+				case 0:
+				    animation('data_output', 400, fm_cc);
+				    break;
+				case 1:
+				    animation('data_output', 400, fm_fl_dt);
+				    break;
+			    }
+			});
+			break;
+		    case 6:
+			animation('data_output', 400, fm_wt);
+			ajax_dynamic_post('../scripts/account/ch_delete.php', "ch_in=" + data_array['u_d']['USERINDEX'] + "&f_num=" + data_array['function']).then(function (data) {;
+			    data_array = {};
+			    switch (data['res']) {
+				case 0:
+				    animation('data_output', 400, fm_cc);
+				    break;
+				case 1:
+				    animation('data_output', 400, fm_fl_dt);
+				    break;
+			    }
+			});
 			break;
 		}
 	    });
 
+	    //CONFIRM (BACK)
 	    $(document).on('click', '#bt_cf_bk', function () {
 		switch (data_array['function']) {
-		    case 1: animation('data_output', 400, fm_cr); break;
-		    case 2: animation('data_output', 400, fm_ch_i); break;
-		    case 3: animation('data_output', 400, fm_ch_n); break;
-		    case 4: animation('data_output', 400, fm_ch_p); break;
+		    case 1:
+			animation('data_output', 400, fm_cr);
+			break;
+		    case 3:
+		    case 4:
+		    case 5:
+			animation_to_sites('data_output', 400, './account.php');
+			break;
+		    case 6:
+			animation_to_sites('', 400, './account.php');
+			break;
 		}
 	    });
 
 	    //FAILED (Input Error)
 	    $(document).on('click', '#bt_fl_cf_bk', function () {
 		switch (data_array['function']) {
-		    case 1: animation('data_output', 400, fm_cr); break;
-		    case 2: animation('data_output', 400, fm_ch_i); break;
-		    case 3: animation('data_output', 400, fm_ch_n); break;
-		    case 4: animation('data_output', 400, fm_ch_p); break;
+		    case 1:
+			animation('data_output', 400, fm_cr);
+			break;
+		    case 3:
+			fm_w = fm_ch_i;
+			break;
+		    case 4:
+			fm_w = fm_ch_n;
+			break;
+		    case 5:
+			fm_w = fm_ch_p;
+			break;
+		}
+		if(data_array['function'] !== 1) {
+		    fm_w = fm_w.replace('[USER]', data_array['u_d']['USERNAME']);
+		    animation('data_output', 400, fm_w);
 		}
 	    });
 
